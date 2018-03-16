@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        #canvas {
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+<canvas width='800' height='400' id='canvas'></canvas>
+<script>
+    var canvas = document.getElementById('canvas');
+    var context = canvas.getContext('2d');
+
+    //1. 实现取色板
+    for (var i = 0; i < 10; i++) {
+        for (var j = 0; j < 10; j++) {
+            //Math.round: 四舍五入， floor向下取整， ceil向上取整
+            var color = "rgb("+Math.round(i * 25.5)+", "+Math.round(j * 25.5)+", 0)";
+            // console.log(color);
+
+            //画每个色块
+            context.fillStyle = color;
+            context.fillRect(i*30, j*30, 30, 30);
+        }
+    }
+
+    //是否已经取到了颜色
+    var hasColor = false;
+
+    //2. 点击取色
+    canvas.onclick = function(event) {
+        var x = event.offsetX;
+        var y = event.offsetY;
+
+        //如果x在取色板的区域内，才可以点击取色
+        if (!(x >=0 && x <= 300 && y >=0 && y <= 300)) {
+            return;
+        }   
+
+        console.log("x:"+x+", y:"+y);
+
+        var i = Math.floor(x / 30); //水平方向第几个格子
+        var j = Math.floor(y / 30); //垂直方向第几个格子
+        console.log("i:"+i+", j:"+j);
+
+        var color = "rgb("+Math.round(i * 25.5)+", "+Math.round(j * 25.5)+", 0)";
+
+        context.fillStyle = color;
+        context.fillRect(120, 320, 50, 50);
+
+        //选中颜色之后，把画笔设为这个颜色
+        context.strokeStyle = color;
+
+        //此时已经取到了颜色
+        hasColor = true;
+    }
+
+    //鼠标是否已经按下
+    var hasDown = false;
+
+    canvas.onmousedown = function(event) {
+        var x = event.offsetX;
+        var y = event.offsetY;
+
+        if (x > 300 && x < 800 & y > 0 && y < 400) {
+            //代表鼠标已经按下去了
+            context.moveTo(x, y);
+            hasDown = true;
+        }
+    }
+
+    //移动鼠标
+    canvas.onmousemove = function(event) {
+
+        //如果没有取到颜色， 或者没有按下鼠标，则什么也不会发生了
+        if (!hasColor || !hasDown) return;
+
+        //判断鼠标移动的区域是否在可绘制区域
+        var x = event.offsetX;
+        var y = event.offsetY;
+        if (x >= 310 && x <= 790 & y >= 10 && y <= 390) {
+            //开始画图
+            context.lineTo(x, y);
+            context.stroke();
+            context.beginPath();
+            context.moveTo(x, y);
+        } else {
+            console.log("x:"+x+", y:"+y);
+            //当鼠标移动到了绘制区域之外， 就执行moveTo的操作
+            context.moveTo(x, y);
+        }
+    }
+
+    //当鼠标松开的时候，停止绘制
+    canvas.onmouseup = function() {
+        hasDown = false;
+    }
+    
+</script>
+</body>
+</html>
+
+<!-- 
+    1. 实现调色板
+        本质： 两层for循环循环画 矩形
+        难点： 根据坐标计算 color
+    2. 实现取色功能
+        本质： 监听我们的鼠标的位置， 根据鼠标的位置， 计算出当前水平方向第几个格子（i）， 垂直方向第几个格子（j）
+    3. 实现画图
+        1. 条件： 已经取到了颜色 hasColor；已经按下去了， 并且在可绘制区域里面按下去的 hasDown
+        2. mousemove事件： 鼠标移动的过程， 其实是一个一个的点， 这些点之间相连画线，就形成了连续的线条了
+
+    二八少女体似酥， 腰间仗剑斩愚夫。 虽然不见人头落， 暗里教君骨髓枯。
+ -->
